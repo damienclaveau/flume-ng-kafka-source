@@ -36,6 +36,7 @@ import org.apache.flume.EventDeliveryException;
 import org.apache.flume.PollableSource;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.conf.ConfigurationException;
+import org.apache.flume.event.EventBuilder;
 import org.apache.flume.event.SimpleEvent;
 import org.apache.flume.source.AbstractSource;
 import org.slf4j.Logger;
@@ -57,19 +58,12 @@ public class KafkaSource extends AbstractSource implements Configurable, Pollabl
 	
 	public Status process() throws EventDeliveryException {
 		List<Event> eventList = new ArrayList<Event>();
-		Event event;
-		Map<String, String> headers;
 		byte [] bytes;
 		try {
 			if(it.hasNext()) {
 				bytes = it.next().message();
-				event = new SimpleEvent();
-				headers = new HashMap<String, String>();
-				headers.put("timestamp", String.valueOf(System.currentTimeMillis()));
 				log.debug("Message: {}", new String(bytes));
-				event.setBody(bytes);
-				event.setHeaders(headers);
-				eventList.add(event);
+				eventList.add(EventBuilder.withBody(bytes));
 			}
 			getChannelProcessor().processEventBatch(eventList);
 			return Status.READY;
