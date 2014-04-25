@@ -43,81 +43,80 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KafkaSourceTest {
-	private static final Logger log = LoggerFactory.getLogger(KafkaSourceTest.class);
+    private static final Logger log = LoggerFactory.getLogger(KafkaSourceTest.class);
+
+    private KafkaSource mockKafkaSource;
+
+    private ConsumerIterator<byte[], byte[]> mockIt;
+
+    @SuppressWarnings("rawtypes")
+    private MessageAndMetadata mockMessageAndMetadata;
+    private ChannelProcessor mockChannelProcessor;
+    private ByteBuffer mockBuffer;
+    private Message mockMessage;
 
 
-	private KafkaSource mockKafkaSource;
+    @SuppressWarnings("unchecked")
+    @Before
+    public void setup() throws Exception {
+        mockIt = mock(ConsumerIterator.class);
+        mockMessageAndMetadata = mock(MessageAndMetadata.class);
+        mockChannelProcessor = mock(ChannelProcessor.class);
+        mockBuffer = mock(ByteBuffer.class);
+        mockMessage = mock(Message.class);
+        mockKafkaSource = new KafkaSource();
 
-	private ConsumerIterator<byte[], byte[]> mockIt;
+        when(mockMessage.payload()).thenReturn(mockBuffer);
+        when(mockMessageAndMetadata.message()).thenReturn(mockMessage);
 
-	@SuppressWarnings("rawtypes")
-	private MessageAndMetadata mockMessageAndMetadata;
-	private ChannelProcessor mockChannelProcessor;
-	private ByteBuffer mockBuffer;
-	private Message mockMessage;
-	
-	
-	@SuppressWarnings("unchecked")
-	@Before
-	public void setup() throws Exception {
-		mockIt = mock(ConsumerIterator.class);
-		mockMessageAndMetadata = mock(MessageAndMetadata.class);
-		mockChannelProcessor = mock(ChannelProcessor.class);
-		mockBuffer = mock(ByteBuffer.class);
-		mockMessage = mock(Message.class);
-		mockKafkaSource = new KafkaSource();
-		
-		when(mockMessage.payload()).thenReturn(mockBuffer);
-		when(mockMessageAndMetadata.message()).thenReturn(mockMessage);
-		
-		Field field = AbstractSource.class.getDeclaredField("channelProcessor");
-		field.setAccessible(true);
-		field.set(mockKafkaSource, mockChannelProcessor);
+        Field field = AbstractSource.class.getDeclaredField("channelProcessor");
+        field.setAccessible(true);
+        field.set(mockKafkaSource, mockChannelProcessor);
 
-		field = KafkaSource.class.getDeclaredField("it");
-		field.setAccessible(true);
-		field.set(mockKafkaSource, mockIt);
-	}
+        field = KafkaSource.class.getDeclaredField("it");
+        field.setAccessible(true);
+        field.set(mockKafkaSource, mockIt);
+    }
 
-	@After
-	public void tearDown() throws Exception {
-	}
+    @After
+    public void tearDown() throws Exception {
+    }
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testProcessItNotEmpty() throws EventDeliveryException, SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-		when(mockIt.next()).thenReturn(mockMessageAndMetadata);
-		when(mockIt.hasNext()).thenReturn(true);
-		Status status = mockKafkaSource.process();
-		verify(mockIt, times(1)).hasNext();
-		verify(mockIt, times(1)).next();
-		verify(mockChannelProcessor, times(1)).processEventBatch(anyList());
-		when(mockIt.next()).thenReturn(mockMessageAndMetadata);
-		assertEquals(Status.READY, status);
-	}
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testProcessItNotEmpty() throws EventDeliveryException, SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        when(mockIt.next()).thenReturn(mockMessageAndMetadata);
+        when(mockIt.hasNext()).thenReturn(true);
+        Status status = mockKafkaSource.process();
+        verify(mockIt, times(1)).hasNext();
+        verify(mockIt, times(1)).next();
+        verify(mockChannelProcessor, times(1)).processEventBatch(anyList());
+        when(mockIt.next()).thenReturn(mockMessageAndMetadata);
+        assertEquals(Status.READY, status);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testProcessItEmpty() throws EventDeliveryException, SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-		when(mockIt.next()).thenReturn(mockMessageAndMetadata);
-		when(mockIt.hasNext()).thenReturn(false);
-		Status status = mockKafkaSource.process();
-		verify(mockIt, times(1)).hasNext();
-		verify(mockIt, times(0)).next();
-		verify(mockChannelProcessor, times(1)).processEventBatch(anyList());
-		when(mockIt.next()).thenReturn(mockMessageAndMetadata);
-		assertEquals(Status.READY, status);
-	}
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testProcessItEmpty() throws EventDeliveryException, SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        when(mockIt.next()).thenReturn(mockMessageAndMetadata);
+        when(mockIt.hasNext()).thenReturn(false);
+        Status status = mockKafkaSource.process();
+        verify(mockIt, times(1)).hasNext();
+        verify(mockIt, times(0)).next();
+        verify(mockChannelProcessor, times(1)).processEventBatch(anyList());
+        when(mockIt.next()).thenReturn(mockMessageAndMetadata);
+        assertEquals(Status.READY, status);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testProcessException() throws EventDeliveryException, SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-		when(mockIt.next()).thenThrow(new RuntimeException());
-		when(mockIt.hasNext()).thenReturn(true);
-		Status status = mockKafkaSource.process();
-		verify(mockIt, times(1)).hasNext();
-		verify(mockIt, times(1)).next();
-		verify(mockChannelProcessor, times(0)).processEventBatch(anyList());
-		assertEquals(Status.BACKOFF, status);
-	}
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testProcessException() throws EventDeliveryException, SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        when(mockIt.next()).thenThrow(new RuntimeException());
+        when(mockIt.hasNext()).thenReturn(true);
+        Status status = mockKafkaSource.process();
+        verify(mockIt, times(1)).hasNext();
+        verify(mockIt, times(1)).next();
+        verify(mockChannelProcessor, times(0)).processEventBatch(anyList());
+        assertEquals(Status.BACKOFF, status);
+    }
 }

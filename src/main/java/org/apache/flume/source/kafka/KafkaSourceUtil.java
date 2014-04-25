@@ -32,41 +32,23 @@ import org.slf4j.LoggerFactory;
 
 
 public class KafkaSourceUtil {
-	private static final Logger log = LoggerFactory.getLogger(KafkaSourceUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(KafkaSourceUtil.class);
 
-	public static Properties getKafkaConfigProperties(Context context) {
-		log.info("context={}",context.toString());
-		Properties props = new Properties();
-		Map<String, String> contextMap = context.getParameters();
-		for(String key : contextMap.keySet()) {
-			if (!key.equals("type") && !key.equals("channel")) {
-				props.setProperty(key, context.getString(key));
-				log.info("key={},value={}",key,context.getString(key));
-			}
-		}
-		return props;
-	}
-	public static ConsumerConnector getConsumer(Context context) throws IOException, InterruptedException {
-		ConsumerConfig consumerConfig = new ConsumerConfig(getKafkaConfigProperties(context));
-		ConsumerConnector consumer = Consumer.createJavaConsumerConnector(consumerConfig);
-		return consumer;
-	}
+    public static Properties getKafkaConfigProperties(Context context) {
+        log.info("context={}",context.toString());
+        Properties props = new Properties();
+        Map<String, String> contextMap = context.getParameters();
+        for(String key : contextMap.keySet()) {
+            if (!key.equals("type") && !key.equals("channel")) {
+                props.setProperty(key, context.getString(key));
+                log.info("key={},value={}",key,context.getString(key));
+            }
+        }
+        return props;
+    }
+    public static ConsumerConnector getConsumer(Context context) throws IOException, InterruptedException {
+        ConsumerConfig consumerConfig = new ConsumerConfig(getKafkaConfigProperties(context));
+        ConsumerConnector consumer = Consumer.createJavaConsumerConnector(consumerConfig);
+        return consumer;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

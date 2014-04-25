@@ -28,36 +28,36 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class KafkaSourceUtilTest {
-	private Properties props = new Properties();
+    private Properties props = new Properties();
 
-	@Before
-	public void setUp() throws Exception {
-		Context context = new Context();
-		context.put("consumer.timeout", "10");
-		context.put("type", "KafkaSource");
-		context.put("topic", "test");
-		props = KafkaSourceUtil.getKafkaConfigProperties(context);
-	}
+    @Before
+    public void setUp() throws Exception {
+        Context context = new Context();
+        context.put("consumer.timeout", "10");
+        context.put("type", "KafkaSource");
+        context.put("topic", "test");
+        props = KafkaSourceUtil.getKafkaConfigProperties(context);
+    }
 
-	@After
-	public void tearDown() throws Exception {
-	}
+    @After
+    public void tearDown() throws Exception {
+    }
 
-	@Test
-	public void testGetKafkaConfigParameter() {
-		assertEquals("10",props.getProperty("consumer.timeout"));
-		assertEquals("test",props.getProperty("topic"));
-		assertNull(props.getProperty("type"));
-	}
+    @Test
+    public void testGetKafkaConfigParameter() {
+        assertEquals("10",props.getProperty("consumer.timeout"));
+        assertEquals("test",props.getProperty("topic"));
+        assertNull(props.getProperty("type"));
+    }
 
-	@Test
-	public void testGetProducer() {
-//		fail("Not yet implemented");
-	}
+    @Test
+    public void testGetProducer() {
+        // fail("Not yet implemented");
+    }
 
-	@Test
-	public void testGetConsumer() {
-//		fail("Not yet implemented");
-	}
+    @Test
+    public void testGetConsumer() {
+        // fail("Not yet implemented");
+    }
 
 }
