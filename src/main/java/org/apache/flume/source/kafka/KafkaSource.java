@@ -27,6 +27,7 @@ import java.util.Map;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.message.MessageAndMetadata;
 
 import org.apache.flume.Context;
 import org.apache.flume.Event;
@@ -51,15 +52,20 @@ public class KafkaSource extends AbstractSource implements Configurable, Pollabl
     private ConsumerConnector consumer;
     private ConsumerIterator<byte[], byte[]> it;
     private String topic;
+    private String keyField;
 
     public Status process() throws EventDeliveryException {
-        List<Event> eventList = new ArrayList<Event>();
-        byte [] bytes;
         try {
+            List<Event> eventList = new ArrayList<Event>();
+            byte [] body;
             if(it.hasNext()) {
-                bytes = it.next().message();
-                log.debug("Message: {}", new String(bytes));
-                eventList.add(EventBuilder.withBody(bytes));
+                MessageAndMetadata<byte[], byte[]> message = it.next();
+                body = message.message();
+                Map<String, String> headers = new HashMap<String, String>();
+                if (keyField != null) {
+                    headers.put(keyField, new String(message.key()));
+                }
+                eventList.add(EventBuilder.withBody(body, headers));
             }
             getChannelProcessor().processEventBatch(eventList);
             return Status.READY;
@@ -71,6 +77,7 @@ public class KafkaSource extends AbstractSource implements Configurable, Pollabl
 
     public void configure(Context context) {
         topic = context.getString("topic");
+        keyField = context.getString("keyField", null);
         if(topic == null) {
             throw new ConfigurationException("Kafka topic must be specified.");
         }

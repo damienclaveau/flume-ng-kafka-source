@@ -11,6 +11,7 @@ Configuration of Kafka Source
     agent_log.sources.kafka0.topic = all
     agent_log.sources.kafka0.group.id = es
     agent_log.sources.kafka0.channels = channel0
+    agent_log.sources.kafka0.keyField = kafka_key
 
 Speical Thanks
 ---------
